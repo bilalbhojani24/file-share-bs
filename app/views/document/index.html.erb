@@ -15,7 +15,6 @@
     <table class="table">
       <thead class="thead-dark">
         <tr>
-          <th>Userid</th>
           <th>Filename</th>
           <th>Date of upload</th>
           <th>Size</th>
@@ -26,13 +25,12 @@
       <% @document.each do |document| %>
         <% if document.user_document.attached? %>
           <tr>
-            <td><%= document.user_id %></td>
             <td><%= document.user_document.filename %></td>
             <td><%= document.user_document.created_at.strftime("%-d %b %Y %H:%M") %></td>
             <td><%= human_readable_size(document.user_document.byte_size) %></td>
-            <td>
-              <%= link_to 'Download', document.user_document, download: '' %> |&nbsp;
-              <%= link_to 'Delete',  document_path(document.id), data: { "turbo-method": :delete, turbo_confirm: 'Are you sure?'} %>
+            <td class="d-flex align-items-top">
+              <%= link_to 'Download', document.user_document, download: '', class: "btn btn-outline-none pt-0" %> |&nbsp;
+              <%= button_to 'Delete', document_path(document.id),  method: :delete, data: {confirm: 'Are you sure?'}, class: "btn btn-outline-none pt-0" %>
             </td>
             <td>
               <%= form_for(:document, url: document_path(document), method: 'patch') do |f| %>

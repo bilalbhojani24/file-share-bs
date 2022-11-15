@@ -10,24 +10,27 @@ class UserController < ApplicationController
 
   def sign_up!
     @user = User.new(
-      name: params[:name],
-      email: params[:email],
-      username: params[:username],
-      password_digest: BCrypt::Password.create(params[:password_digest])
+      name: user_params[:name],
+      email: user_params[:email],
+      username: user_params[:username],
+      password_digest: BCrypt::Password.create(user_params[:password_digest])
     )
-
-    respond_to do |format|
-      if params[:password_digest].length < 8
-        handle_error(format, :sign_up, "Password is short", "password")
-      elsif !params[:password_digest].match(/(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).*/)
-        handle_error(format, :sign_up, "Password must contain one uppercase, lowercase and number", "password")
-      elsif @user.save
-        format.html { redirect_to "/" }
-        format.json { render :show, status: :created, location: @user }
-        session[:user] = @user.id
-      else
-        handle_error(format, :sign_up, "Something went wrong!", "password")
-      end
+    
+    if user_params[:password_digest].length < 8
+      @user.errors.add(:password_digest, "Passwors is short")
+      flash[:messages] = @user.errors
+      redirect_to :sign_up
+    elsif !user_params[:password_digest].match(/(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).*/)
+      @user.errors.add(:password_digest, "Password must contain one uppercase, lowercase and number")
+      flash[:messages] = @user.errors
+      redirect_to :sign_up
+    elsif @user.valid?
+      @user.save
+      session[:user] = @user.id
+      redirect_to "/"
+    else
+      flash[:messages] = @user.errors
+      redirect_to :sign_up
     end
   end
 
@@ -36,21 +39,13 @@ class UserController < ApplicationController
   end
 
   def sign_in!
-    @user = User.find_by(username: params[:username])
-
-    respond_to do |format|
-      if !@user
-        puts "No user found!!!"
-        flash[:notice] = "Username is incorrrect"
-        redirect_to "/sign_in"
-        # handle_error(format, :sign_up, "User does not exist!", "password")
-      elsif !BCrypt::Password.new(@user.password_digest).is_password?(params[:password])
-        handle_error(format, :sign_up, "Password is incorrect", "password")
-      else
+    @user = User.find_by(username: user_params[:username])
+    if @user && BCrypt::Password.new(@user.password_digest).is_password?(user_params[:password_digest])
         session[:user] = @user.id
-        format.html { redirect_to "/" }
-        format.json { render :show, status: :created, location: @user }
-      end
+        redirect_to "/"
+    else
+        flash[:messages] = "Username or Password incorrect! Please try again"
+        redirect_to "/sign_in"
     end
   end
 
@@ -71,10 +66,14 @@ class UserController < ApplicationController
   end
 
   # Helper function for error handling
-  def handle_error (format, _path, message, field)
-    @user.errors.add(:field, message)
-    format.html { render _path, status: :unprocessable_entity }
-    format.json { render json: @user.errors, status: :unprocessable_entity }
+  def handle_error (message, redirect)
+    flash[:notice] = message
+    redirect_to redirect
   end
+
+  private
+    def user_params
+        params.require(:user).permit(:username, :name, :email, :password_digest)
+    end
 
 end

@@ -1,18 +1,22 @@
 <h2 class="text-center mb-4">Sign in</h2>
-<% if @user.errors.any? %>
-  <ul>
-    <% @user.errors.each do |err| %>
-      <li class="text-danger"><%= err.message %></li>
-    <% end %>
-  </ul>
+
+<% if flash[:messages] %>
+  <p class="text-danger"><%= flash[:messages] %> </p>
 <% end %>
-<%= form_tag("/sign_in", method: "post") do %>
-  <input type="text" name="username" placeholder="username"  class="form-control mb-4" />
-  <input type="password" name="password" placeholder="password" class="form-control mb-4"  />
-  <input type="submit" value="Sign in" class="btn btn-dark" />
-  <% if @params %>
-    <div class="form-message">
-      <small class="text-danger">Username or Password incorrect! Please try again</small>
-    </div>
-  <% end %>
+
+<%= form_for(@user, url: "/sign_in", method: "post") do |f| %>
+  <div class="form-group">
+    <%= f.label :username, 'Username' %>
+    <%= f.text_field :username, required: true, maxlength: 15, class: "form-control" %>
+  </div>
+
+  <div class="form-group">
+    <%= f.label :password_digest, 'Password' %>
+    <%= f.password_field :password_digest, class: "form-control", required: true, pattern: '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).*', title: 'Password must contain atleast one uppercase, lowercase and number' %>
+  </div>
+
+  <div class="form-group">
+    <%= f.submit "Login", class: 'btn btn-dark btn-block btn-lg' %>
+  </div>
+  
 <% end %>

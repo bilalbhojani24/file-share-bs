@@ -26,7 +26,7 @@ class DocumentController < ApplicationController
     @document = current_user.documents.find_by!(id: params[:id])
     @document && @document.update(shared: @checked) 
     flash[:notice] = "Status updated successfully!"
-    redirect_to '/document'
+    redirect_to '/'
   end
 
   def destroy
