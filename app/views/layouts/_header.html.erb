@@ -1,0 +1,14 @@
+<nav class="navbar navbar-dark bg-dark">
+  <%= link_to(root_path) do %>
+    <b class="navbar-brand">Rails File Share</b>
+  <% end %>
+  <div class="navbar-right">
+    <% if session[:user] %>
+      <%= link_to "Profile", "/update/#{current_user.username}", class:"mr-3 text-light" %>
+      <%= link_to 'Logout', "/sign_out" %>
+    <% else %>
+      <%= link_to 'Sign Up', "/sign_up", class:"text-light mr-3" %>
+      <%= link_to 'Login', "/sign_in" , class:"text-light" %>
+    <% end %>
+  </div>
+</nav>

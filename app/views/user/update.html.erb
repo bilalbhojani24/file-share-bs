@@ -1,0 +1,15 @@
+<h2 class="text-center mb-4">Profile page</h2>
+<% if @user.errors.any? %>
+  <h3>The following errors prevented the article from being saved:</h3>
+  <ul>
+    <% @user.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %>
+  </ul>
+<% end %>
+<%= form_tag("/update", method: "post") do %>
+  <input type="text" name="name" placeholder="Enter your name..." class="form-control mb-4" value="<%= @user.name %>" />
+  <input type="email" name="email" placeholder="Enter your email.." class="form-control mb-4" value="<%= @user.email %>" />
+  <input type="text" name="username"  class="form-control mb-4" value="<%= @user.username %>" />
+  <input type="submit" value="Update profile" />
+<% end %>

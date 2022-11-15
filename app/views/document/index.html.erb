@@ -1,0 +1,55 @@
+<div class="card">
+  <div class="card-header">
+    <div class="row justify-content-between align-items-center">
+      <div class="col-8">
+        <h1>File Dashboard - <%= @document.length %></h1>
+      </div>
+      <div class="col-4">
+        <%= form_for(:document, url: '/document', method: 'post') do |form| %>
+          <%= form.file_field :user_document, onchange: "this.form.submit();" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+  <div class="card-body p-0">
+    <table class="table">
+      <thead class="thead-dark">
+        <tr>
+          <th>Userid</th>
+          <th>Filename</th>
+          <th>Date of upload</th>
+          <th>Size</th>
+          <th>Actions</th>
+          <th>Sharing</th>
+        </tr>
+      </thead>
+      <% @document.each do |document| %>
+        <% if document.user_document.attached? %>
+          <tr>
+            <td><%= document.user_id %></td>
+            <td><%= document.user_document.filename %></td>
+            <td><%= document.user_document.created_at.strftime("%-d %b %Y %H:%M") %></td>
+            <td><%= human_readable_size(document.user_document.byte_size) %></td>
+            <td>
+              <%= link_to 'Download', document.user_document, download: '' %> |&nbsp;
+              <%= link_to 'Delete',  document_path(document.id), data: { "turbo-method": :delete, turbo_confirm: 'Are you sure?'} %>
+            </td>
+            <td>
+              <%= form_for(:document, url: document_path(document), method: 'patch') do |f| %>
+                <div class="custom-control custom-switch">
+                  <input class="custom-control-input" type="checkbox" onclick="this.form.submit();" value="1" <%= 'checked' if document.shared %>
+                name="document[shared]" id="share-<%= document.key %>"/><label class="custom-control-label" for="share-<%= document.key %>"></label>
+                </div>
+                <div>
+                  <% if document.shared %>
+                    <%= link_to "Link", document_path(document.key), target: :_blank %>
+                  <% end %>
+                </div>
+              <% end %>
+            </td>
+          </tr>
+        <%end%>
+      <%end%>
+    </table>
+  </div>
+</div>
