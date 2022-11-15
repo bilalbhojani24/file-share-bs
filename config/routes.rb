@@ -2,7 +2,6 @@ Rails.application.routes.draw do
   root 'document#index'
 
   resources :document, except: [:edit, :new]
-  delete "/delete/:id", to: "document#destroy"
   
   get '/sign_in', to: 'user#sign_in'
   post '/sign_in', to: 'user#sign_in!'
