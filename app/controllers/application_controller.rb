@@ -1,24 +1,12 @@
 class ApplicationController < ActionController::Base
-    helper_method :current_user, :human_readable_size, :private_route
+    protect_from_forgery with: :exception
+    before_action :configure_permitted_parameters, if: :devise_controller?
 
-    def current_user 
-        @current_user ||= User.find(session[:user]) if session[:user]
-    end
-    
-    def private_route 
-        redirect_to '/sign_in' unless current_user 
-    end 
-
-    def human_readable_size(size)
-        @kilo = size / 1024
-        if @kilo < 1024
-            return "#{@kilo} KB"
-        end
-        @mega = @kilo / 1024
-        if @mega < 1024
-            return "#{@mega} MB"
-        end
-        @giga = @mb / 1024
-        return "#{@giga} GB"
+    protected
+        
+    def configure_permitted_parameters
+        devise_parameter_sanitizer.permit(:sign_up, keys: [:name, :username, :email, :password])
+        devise_parameter_sanitizer.permit(:sign_in, keys: [:login, :password])  
+        devise_parameter_sanitizer.permit(:account_update, keys: [:name, :email])  
     end
 end

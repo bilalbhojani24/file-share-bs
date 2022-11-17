@@ -1,6 +1,7 @@
 class DocumentController < ApplicationController
-  before_action :private_route
+  before_action :authenticate_user!, except: [:show]
   before_action :correct_user, only: [:edit, :update, :destroy]
+  helper_method :human_readable_size
 
   def index
     @document = current_user.documents.order!(created_at: :desc) 
@@ -36,6 +37,7 @@ class DocumentController < ApplicationController
     redirect_to '/'
   end
 
+
   private
 
   def document_params
@@ -45,6 +47,19 @@ class DocumentController < ApplicationController
   def correct_user
     @document = current_user.documents.find_by(id: params[:id])
     redirect_to "/", notice: "Not Authorized to perform this action" if @document.nil?
+  end
+
+  def human_readable_size(size)
+    @kilo = size / 1024
+      if @kilo < 1024
+        return "#{@kilo} KB"
+      end
+        @mega = @kilo / 1024
+      if @mega < 1024
+        return "#{@mega} MB"
+      end
+        @giga = @mb / 1024
+    return "#{@giga} GB"
   end
   
 end

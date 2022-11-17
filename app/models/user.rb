@@ -1,9 +1,20 @@
 class User < ApplicationRecord
-    has_many :documents
-    validates_presence_of :name, message: "Name is required"
-    validates_presence_of :email, message: "Email is required"
-    validates_presence_of :username, message: "Username is required"
-    validates :username, uniqueness: {message: "Username is already taken!"}
-    validates :password_digest, presence: true
-    has_secure_password
+  attr_accessor :login
+  devise :database_authenticatable, :registerable,
+         :recoverable, :rememberable, :validatable, :authentication_keys => [:login]
+  has_many :documents
+  
+  validates :name, :email, :username, presence: true
+  validates :username, uniqueness: true
+  validates_presence_of :password, message: "Password is required", length: { minimum: 8, maximum: 15 }, on: :create
+  validates :password, format: { with: /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).*/, message:  "Password must contain atleast one uppercase, lowercase and number"  }, on: :create
+
+  def self.find_for_database_authentication warden_condition
+    conditions = warden_condition.dup
+    login = conditions.delete(:login)
+    where(conditions).where(
+      ["lower(username) = :value OR lower(email) = :value",
+      { value: login.strip.downcase}]).first
+  end
+  
 end

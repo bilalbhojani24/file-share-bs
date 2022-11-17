@@ -9,22 +9,9 @@ class UserController < ApplicationController
   end
 
   def sign_up!
-    @user = User.new(
-      name: user_params[:name],
-      email: user_params[:email],
-      username: user_params[:username],
-      password_digest: BCrypt::Password.create(user_params[:password_digest])
-    )
+    @user = User.new(user_params)
     
-    if user_params[:password_digest].length < 8
-      @user.errors.add(:password_digest, "Passwors is short")
-      flash[:messages] = @user.errors
-      redirect_to :sign_up
-    elsif !user_params[:password_digest].match(/(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).*/)
-      @user.errors.add(:password_digest, "Password must contain one uppercase, lowercase and number")
-      flash[:messages] = @user.errors
-      redirect_to :sign_up
-    elsif @user.valid?
+    if @user.valid?
       @user.save
       session[:user] = @user.id
       redirect_to "/"
@@ -40,7 +27,7 @@ class UserController < ApplicationController
 
   def sign_in!
     @user = User.find_by(username: user_params[:username])
-    if @user && BCrypt::Password.new(@user.password_digest).is_password?(user_params[:password_digest])
+    if @user && @user.authenticate(user_params[:password])
         session[:user] = @user.id
         redirect_to "/"
     else
@@ -73,7 +60,7 @@ class UserController < ApplicationController
 
   private
     def user_params
-        params.require(:user).permit(:username, :name, :email, :password_digest)
+        params.require(:user).permit(:username, :name, :email, :password)
     end
 
 end

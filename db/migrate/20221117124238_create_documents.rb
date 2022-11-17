@@ -2,8 +2,8 @@ class CreateDocuments < ActiveRecord::Migration[6.0]
   def change
     create_table :documents do |t|
       t.string :key
-      t.boolean :shared
       t.integer :user_id
+      t.boolean :shared
 
       t.timestamps
     end
